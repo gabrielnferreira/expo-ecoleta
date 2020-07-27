@@ -1,47 +1,68 @@
-import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native';
 import Constants from 'expo-constants';
 import { Feather as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { } from 'react-native-gesture-handler';
 import MapView from 'react-native-maps';
+import { SvgUri } from 'react-native-svg';
+import api from '../../services/api';
 
+interface Item {
+    id: number;
+    title: string;
+    image_url: string;
+}
 
 const Points = () => {
+    const [items, setItems] = useState<Item[]>([]);
     const navigation = useNavigation();
 
     function handleNavigationBack() {
         navigation.goBack();
     }
 
+    useEffect(() => {
+        api.get('items')
+            .then(response => {
+                setItems(response.data);
+            })
+    }, [])
+
     return (
-        <View style={styles.container}>
-            <TouchableOpacity onPress={handleNavigationBack}>
-                <Icon name="arrow-left" size={20} color="#34cb79"></Icon>
-            </TouchableOpacity>
+        <>
+            <View style={styles.container}>
+                <TouchableOpacity onPress={handleNavigationBack}>
+                    <Icon name="arrow-left" size={20} color="#34cb79"></Icon>
+                </TouchableOpacity>
 
-            <Text style={styles.title}>
-                Bem vindo.
-            </Text>
-            <Text style={styles.description}>
-                Encontre no mapa um ponto de coleta.
-            </Text>
+                <Text style={styles.title}>
+                    Bem vindo.
+                </Text>
+                <Text style={styles.description}>
+                    Encontre no mapa um ponto de coleta.
+                </Text>
 
-            <View style={styles.mapContainer}>
-                <MapView style={styles.map} />
+                <View style={styles.mapContainer}>
+                    <MapView style={styles.map}  />
+                </View>
             </View>
             <View style={styles.itemsContainer}>
-                <TouchableOpacity style={styles.item} onPress={() => {}}>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 10 }}
+                >
 
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.item} onPress={() => {}}>
-
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.item} onPress={() => {}}>
-
-                </TouchableOpacity>
+                    {items.map(item => (
+                        <TouchableOpacity key={String(item.id)} style={styles.item} onPress={() => { }}>
+                            <SvgUri width={42} height={42} uri={item.image_url} />
+                            <Text style={styles.itemTitle}>{item.title}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
-        </View>
+        </>
 
     )
 }
